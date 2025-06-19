@@ -1,0 +1,7 @@
+{
+  "id": "velocitycore",
+  "name": "${project.name}",
+  "version": "${project.version}",
+  "main": "com.github.henriquemb.velocitycore.VelocityCore",
+  "author": "henriquemb"
+}
