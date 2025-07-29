@@ -36,21 +36,21 @@ public class TellCommand implements SimpleCommand {
 
         Player p = (Player) source;
 
-        Player t;
-        boolean useAlias = false;
+        Player t = null;
+        boolean isReply = false;
 
         if (invocation.alias().equalsIgnoreCase("reply") || invocation.alias().equalsIgnoreCase("r")) {
             t = VelocityCore.getModel().getTellReply().get(p);
-            useAlias = true;
-        }
-        else {
-            t = VelocityCore.getProxy().getPlayer(args.get(0)).orElse(null);
+            isReply = true;
         }
 
-        if ((useAlias && args.isEmpty()) || (!useAlias && args.size() == 1)) {
+        if ((isReply && args.isEmpty()) || !isReply && args.size() <= 1) {
             Model.sendMessage(p, Messages.TELL_USAGE.asString());
             return;
         }
+
+        if (!isReply)
+            t = VelocityCore.getProxy().getPlayer(args.get(0)).orElse(null);
 
         if (t == null || !t.isActive()) {
             Model.sendMessage(p, Messages.PLAYER_NOT_FOUND.asString());
@@ -65,7 +65,7 @@ public class TellCommand implements SimpleCommand {
         String serverSender = ProxyUtils.getServerName(p);
         String serverReceiver = ProxyUtils.getServerName(t);
 
-        String message = String.join(" ", useAlias ? args : args.subList(1, args.size()));
+        String message = String.join(" ", isReply ? args : args.subList(1, args.size()));
 
         VelocityCore.getModel().getTellReply().put(t, p);
 
@@ -86,8 +86,9 @@ public class TellCommand implements SimpleCommand {
         Model.sendMessage(p, formattedMessage);
         Model.sendMessage(t, formattedMessage);
 
+        final Player target = t;
         VelocityCore.getModel().getTellSpy().stream()
-                .filter(player -> !player.equals(p) && !player.equals(t))
+                .filter(player -> !player.equals(p) && !player.equals(target))
                 .forEach(player -> {
                     Model.sendMessage(player, formattedSpyMessage);
                 });
